@@ -19,6 +19,10 @@ public class GamePanel extends JPanel implements ActionListener {
     boolean running = false;
     Timer timer;
     Random random;
+    boolean gameOverScreen = false;
+    JButton restartButton;
+    JButton exitButton;
+    int selectedButtonIndex = 0;
 
     GamePanel(){
         random = new Random();
@@ -26,20 +30,46 @@ public class GamePanel extends JPanel implements ActionListener {
         this.setPreferredSize(dimention);
         this.setBackground(Color.black);
         this.setFocusable(true);
+        this.setLayout(null);       // for custom component positioning
         MyKeyAdapter myKeyAdapter = new MyKeyAdapter();
         this.addKeyListener(myKeyAdapter);
         startGame();
     }
+
+
+
+
+
     public void startGame(){
         newApple();
         running = true;
         timer = new Timer(DELAY, this);
         timer.start();
     }
+
+    public void resetGame() {
+        bodyParts = 2;
+        applesEaten = 0;
+        direction = 'R';
+        running = false;
+        timer.stop();
+        newApple();
+        // reset the positions of the snake
+        for (int i = 0; i < bodyParts; i++) {
+            x[i] = 0;
+            y[i] = 0;
+        }
+        startGame();
+        this.remove(restartButton); // Remove the reset button from the panel
+        this.remove(exitButton);    // Remove the exit button from the panel
+        gameOverScreen = false;     // Hide the game over screen
+    }
+
     public void paintComponent(Graphics g){
         super.paintComponent(g);
         draw(g);
     }
+
     public void draw(Graphics g){
         if (running) {
             g.setColor(Color.red);
@@ -64,10 +94,12 @@ public class GamePanel extends JPanel implements ActionListener {
             gameOver(g);
         }
     }
+
     public void newApple(){
         appleX = random.nextInt((int)(SCREEN_WIDTH/UNIT_SIZE))*UNIT_SIZE;
         appleY = random.nextInt((int)(SCREEN_HEIGHT/UNIT_SIZE))*UNIT_SIZE;
     }
+
     public void move(){
         for (int i = bodyParts; i>0; i--){
             x[i] = x[i-1];
@@ -89,6 +121,7 @@ public class GamePanel extends JPanel implements ActionListener {
                 break;
         }
     }
+
     public void checkCollisions(){
         // checks if head collides with body
         for (int i = bodyParts; i>0; i--){
@@ -115,6 +148,7 @@ public class GamePanel extends JPanel implements ActionListener {
         }
 
     }
+
     public void checkApple(){
         if ((x[0] == appleX) && (y[0] == appleY)){
             bodyParts++;
@@ -122,19 +156,86 @@ public class GamePanel extends JPanel implements ActionListener {
             newApple();
         }
     }
+
     public void gameOver(Graphics g){
+        // show game over text
         g.setColor(Color.red);
         g.setFont(new Font("", Font.BOLD, 75));
         FontMetrics metrics1 = getFontMetrics(g.getFont());
-        g.drawString("Game Over", (SCREEN_WIDTH - metrics1.stringWidth("Game Over"))/2, SCREEN_HEIGHT/2);
+        int gameOverX = (SCREEN_WIDTH - metrics1.stringWidth("Game Over")) / 2;
+        int gameOverY = SCREEN_HEIGHT / 2;
+        g.drawString("Game Over", gameOverX, gameOverY);
 
-        // reset score
+        // show final score
         g.setColor(Color.red);
         g.setFont(new Font("", Font.BOLD, 40));
         FontMetrics metrics2 = getFontMetrics(g.getFont());
-        g.drawString("Score: " + applesEaten, (SCREEN_WIDTH - metrics2.stringWidth("Score: " + applesEaten))/2, g.getFont().getSize());
+        int scoreX = (SCREEN_WIDTH - metrics2.stringWidth("Score: " + applesEaten)) / 2;
+        int scoreY = gameOverY + metrics1.getHeight();
+        g.drawString("Score: " + applesEaten, scoreX, scoreY);
+
+        if (!gameOverScreen) {
+            // Create the restart button
+            restartButton = new JButton("Restart");
+            restartButton.setSize(100, 50);
+            restartButton.setForeground(Color.white);
+            restartButton.setLocation(SCREEN_WIDTH / 2 - 50, scoreY + 20);
+
+
+            // Create the exit button
+            exitButton = new JButton("Exit");
+            exitButton.setSize(100, 50);
+            exitButton.setForeground(Color.white);
+            exitButton.setLocation(SCREEN_WIDTH / 2 - 50, restartButton.getY() + restartButton.getHeight() + 10);
+
+
+            // Add action listeners to the buttons
+            restartButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    resetGame();
+                }
+            });
+
+            exitButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    System.exit(0);
+                }
+            });
+
+            this.add(restartButton);
+            this.add(exitButton);
+            gameOverScreen = true;
+        }
+
+        // Draw a visual indication of the selected button
+        if (selectedButtonIndex == 0) {
+            restartButton.setBorder(BorderFactory.createLineBorder(Color.gray, 1));
+            exitButton.setBorder(BorderFactory.createEmptyBorder());
+        } else {
+            exitButton.setBorder(BorderFactory.createLineBorder(Color.gray, 1));
+            restartButton.setBorder(BorderFactory.createEmptyBorder());
+        }
 
     }
+    private void selectNextButton() {
+        selectedButtonIndex = (selectedButtonIndex + 1) % 2;
+    }
+    private void selectPreviousButton() {
+        selectedButtonIndex = (selectedButtonIndex - 1 + 2) % 2;
+    }
+    private void pressSelectedButton() {
+        if (selectedButtonIndex == 0) {
+            resetGame();
+        } else {
+            System.exit(0);
+        }
+    }
+
+
+
+
+
+
     @Override
     public void actionPerformed(ActionEvent e) {
         if (running){
@@ -147,27 +248,42 @@ public class GamePanel extends JPanel implements ActionListener {
     public class MyKeyAdapter extends KeyAdapter{
         @Override
         public void keyPressed(KeyEvent e){
-            switch (e.getKeyCode()){
-                case KeyEvent.VK_LEFT:
-                    if (direction != 'R'){
-                        direction = 'L';
-                    }
-                    break;
-                case KeyEvent.VK_RIGHT:
-                    if (direction != 'L'){
-                        direction = 'R';
-                    }
-                    break;
-                case KeyEvent.VK_UP:
-                    if (direction != 'D'){
-                        direction = 'U';
-                    }
-                    break;
-                case KeyEvent.VK_DOWN:
-                    if (direction != 'U'){
-                        direction = 'D';
-                    }
-                    break;
+            int keyCode = e.getKeyCode();
+            if (gameOverScreen) {
+                if (keyCode == KeyEvent.VK_UP) {
+                    selectNextButton();
+                } else if (keyCode == KeyEvent.VK_DOWN) {
+                    selectPreviousButton();
+                } else if (keyCode == KeyEvent.VK_ENTER) {
+                    pressSelectedButton();
+                }
+                repaint();
+            } else {
+                switch (e.getKeyCode()) {
+                    case KeyEvent.VK_LEFT:
+                        if (direction != 'R') {
+                            direction = 'L';
+                        }
+                        break;
+                    case KeyEvent.VK_RIGHT:
+                        if (direction != 'L') {
+                            direction = 'R';
+                        }
+                        break;
+                    case KeyEvent.VK_UP:
+                        if (direction != 'D') {
+                            direction = 'U';
+                        }
+                        break;
+                    case KeyEvent.VK_DOWN:
+                        if (direction != 'U') {
+                            direction = 'D';
+                        }
+                        break;
+                    case KeyEvent.VK_ENTER:
+                        resetGame();
+                        break;
+                }
             }
         }
     }
