@@ -72,23 +72,31 @@ public class GamePanel extends JPanel implements ActionListener {
 
     public void draw(Graphics g){
         if (running) {
+            // show apple
             g.setColor(Color.red);
             g.fillOval(appleX, appleY, UNIT_SIZE, UNIT_SIZE);
 
+            // show snake
             for (int i = 0; i < bodyParts; i++) {
+                // head
                 if (i == 0) {
                     g.setColor(Color.green);
                     g.fillRect(x[i], y[i], UNIT_SIZE, UNIT_SIZE);
+                // body
                 } else {
-                    //g.setColor(new Color(45, 180, 0));
                     g.setColor(new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255)));
                     g.fillRect(x[i], y[i], UNIT_SIZE, UNIT_SIZE);
                 }
             }
+
+            // show final score
             g.setColor(Color.red);
-            g.setFont(new Font("", Font.BOLD, 40));
-            FontMetrics metrics = getFontMetrics(g.getFont());
-            g.drawString("Score: " + applesEaten, (SCREEN_WIDTH - metrics.stringWidth("Score: " + applesEaten))/2, g.getFont().getSize());
+            g.setFont(new Font("Arial", Font.BOLD, 20));
+            g.setColor(Color.white);
+            FontMetrics metrics2 = getFontMetrics(g.getFont());
+            int scoreX = (SCREEN_WIDTH - metrics2.stringWidth("Score: " + applesEaten)) / 2;
+            int scoreY = g.getFont().getSize();
+            g.drawString("Score: " + applesEaten, 20, 30);
         }
         else {
             gameOver(g);
@@ -160,26 +168,32 @@ public class GamePanel extends JPanel implements ActionListener {
     public void gameOver(Graphics g){
         // show game over text
         g.setColor(Color.red);
-        g.setFont(new Font("", Font.BOLD, 75));
+        g.fillRect(0, 0, SCREEN_WIDTH, 150); // Position the banner at the top
+        g.setFont(new Font("Arial", Font.BOLD, 75));
+        g.setColor(Color.white);
         FontMetrics metrics1 = getFontMetrics(g.getFont());
         int gameOverX = (SCREEN_WIDTH - metrics1.stringWidth("Game Over")) / 2;
-        int gameOverY = SCREEN_HEIGHT / 2;
+        int gameOverY = 100;
         g.drawString("Game Over", gameOverX, gameOverY);
+
+
 
         // show final score
         g.setColor(Color.red);
-        g.setFont(new Font("", Font.BOLD, 40));
+        g.setFont(new Font("Arial", Font.BOLD, 40));
+        g.setColor(Color.white);
         FontMetrics metrics2 = getFontMetrics(g.getFont());
         int scoreX = (SCREEN_WIDTH - metrics2.stringWidth("Score: " + applesEaten)) / 2;
-        int scoreY = gameOverY + metrics1.getHeight();
+        int scoreY = gameOverY + 100;
         g.drawString("Score: " + applesEaten, scoreX, scoreY);
+
 
         if (!gameOverScreen) {
             // Create the restart button
             restartButton = new JButton("Restart");
             restartButton.setSize(100, 50);
             restartButton.setForeground(Color.white);
-            restartButton.setLocation(SCREEN_WIDTH / 2 - 50, scoreY + 20);
+            restartButton.setLocation(SCREEN_WIDTH / 2 - 50, scoreY + 250);
 
 
             // Create the exit button
