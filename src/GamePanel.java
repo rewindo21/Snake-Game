@@ -28,7 +28,7 @@ public class GamePanel extends JPanel implements ActionListener {
         random = new Random();
         Dimension dimention = new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT);
         this.setPreferredSize(dimention);
-        this.setBackground(Color.black);
+        this.setBackground(new Color(48, 48, 48));
         this.setFocusable(true);
         this.setLayout(null);       // for custom component positioning
         MyKeyAdapter myKeyAdapter = new MyKeyAdapter();
@@ -73,18 +73,19 @@ public class GamePanel extends JPanel implements ActionListener {
     public void draw(Graphics g){
         if (running) {
             // show apple
-            g.setColor(Color.red);
+            g.setColor(new Color(229, 184, 244));
             g.fillOval(appleX, appleY, UNIT_SIZE, UNIT_SIZE);
 
             // show snake
             for (int i = 0; i < bodyParts; i++) {
                 // head
                 if (i == 0) {
-                    g.setColor(Color.green);
+                    g.setColor(new Color(193, 73, 233));
                     g.fillRect(x[i], y[i], UNIT_SIZE, UNIT_SIZE);
                 // body
                 } else {
-                    g.setColor(new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255)));
+                    //g.setColor(new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255)));
+                    g.setColor(new Color(129, 12, 168));
                     g.fillRect(x[i], y[i], UNIT_SIZE, UNIT_SIZE);
                 }
             }
